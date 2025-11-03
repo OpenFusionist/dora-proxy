@@ -24,7 +24,7 @@ func main() {
 
 	client := &http.Client{Timeout: 20 * time.Second}
 
-	r := buildRouter(cfg, client, upstream, log)
+    r := buildRouter(cfg, client, upstream)
 
 	srv := &http.Server{
 		Addr:         cfg.ListenAddr,

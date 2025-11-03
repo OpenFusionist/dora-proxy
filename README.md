@@ -18,9 +18,7 @@ Environment variables:
 Run:
 
 ```bash
-PROXY_UPSTREAM_BASE_URL=http://localhost:8080 \
-PROXY_CONSENSUS_API_URL=http://localhost:5052 \
-go run ./cmd/dora-proxy
+ROXY_LISTEN_ADDR=:8088 PROXY_UPSTREAM_BASE_URL=https://light-beacon.fusionist.io PROXY_CONSENSUS_API_URL=http://167.235.117.45:5052 go run .
 ```
 
 

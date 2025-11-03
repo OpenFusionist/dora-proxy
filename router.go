@@ -5,10 +5,9 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 )
 
-func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL, log *logrus.Logger) http.Handler {
+func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL) http.Handler {
 	r := mux.NewRouter()
 
 	// POST /api/v1/validator (with status mapping)
@@ -40,7 +39,21 @@ func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL, log *
 		}
 
 		path := "/v1/slot/" + id
-		proxyJSON(w, req, client, upstream, path, nil)
+		// Enrich and then project into typed struct with snake_case tags
+		transform := func(body interface{}) {
+			root, ok := body.(map[string]interface{})
+			if !ok {
+				return
+			}
+			data, _ := root["data"].(map[string]interface{})
+			if data == nil {
+				return
+			}
+			enrichSlotConsensus(req.Context(), client, cfg.ConsensusAPIURL, id, data)
+			slot := buildSlotDataFromMap(data)
+			root["data"] = slot
+		}
+		proxyJSON(w, req, client, upstream, path, transform)
 	}).Methods(http.MethodGet)
 
 	return r

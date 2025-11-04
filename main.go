@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"time"
@@ -24,7 +25,22 @@ func main() {
 
 	client := &http.Client{Timeout: 20 * time.Second}
 
-    r := buildRouter(cfg, client, upstream)
+	// Initialize attestation cache and tracker
+	cache := NewLastAttestCache()
+	tracker := NewAttestationTracker(client, cfg.ConsensusAPIURL, cache, log)
+	// Kick off startup backfill (best-effort) and periodic epoch scans
+	go func() {
+		log.Info("starting attestation backfill (last 3 epochs)")
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+		if err := tracker.Backfill(ctx); err != nil {
+			log.WithError(err).Warn("backfill returned with error")
+		}
+		cancel()
+		log.Info("attestation backfill finished")
+	}()
+	tracker.Start()
+
+	r := buildRouter(cfg, client, upstream, cache)
 
 	srv := &http.Server{
 		Addr:         cfg.ListenAddr,

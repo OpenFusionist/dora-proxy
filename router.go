@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL) http.Handler {
+func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL, cache *LastAttestCache) http.Handler {
 	r := mux.NewRouter()
 
 	// POST /api/v1/validator (with status mapping)
@@ -16,7 +16,13 @@ func buildRouter(cfg *proxyConfig, client *http.Client, upstream *url.URL) http.
 			w.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		proxyJSON(w, req, client, upstream, "/v1/validator", mapValidatorStatus)
+		transform := func(body interface{}) {
+			// remap status
+			mapValidatorStatus(body)
+			// inject lastattestslot using cache
+			attachLastAttestSlot(body, cache)
+		}
+		proxyJSON(w, req, client, upstream, "/v1/validator", transform)
 	}).Methods(http.MethodPost)
 
 	// GET /api/v1/epoch/latest

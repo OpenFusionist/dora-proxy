@@ -104,7 +104,7 @@ func (t *AttestationTracker) Start() {
 				default:
 				}
 				slots++
-				updates += t.processSlotBestEffort(ctx2, s)
+				updates += t.processSlot(ctx2, s)
 			}
 			cancel2()
 
@@ -197,7 +197,7 @@ func (t *AttestationTracker) scanEpochRange(ctx context.Context, startEpoch, end
 			default:
 			}
 			slotsScanned++
-			updates += t.processSlotBestEffort(ctx, slot)
+			updates += t.processSlot(ctx, slot)
 			if slot == startSlot {
 				break
 			}
@@ -212,7 +212,7 @@ func (t *AttestationTracker) scanEpochRange(ctx context.Context, startEpoch, end
 	return slotsScanned, updates, nil
 }
 
-func (t *AttestationTracker) processSlotBestEffort(ctx context.Context, slot uint64) uint64 {
+func (t *AttestationTracker) processSlot(ctx context.Context, slot uint64) uint64 {
 	base := strings.TrimRight(t.consensusAPI, "/")
 	url := base + "/eth/v2/beacon/blocks/" + strconv.FormatUint(slot, 10)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

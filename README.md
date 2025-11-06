@@ -18,7 +18,27 @@ Environment variables:
 Run:
 
 ```bash
-ROXY_LISTEN_ADDR=:8088 PROXY_UPSTREAM_BASE_URL=https://light-beacon.fusionist.io PROXY_CONSENSUS_API_URL=http://167.235.117.45:5052 go run .
+PROXY_LISTEN_ADDR=:8088 PROXY_UPSTREAM_BASE_URL=https://light-beacon.fusionist.io PROXY_CONSENSUS_API_URL=http://your-beacon-node:5052 go run .
 ```
 
 
+
+### Docker
+
+Build the image:
+
+```bash
+docker build -t dora-proxy:latest .
+```
+
+Run the container (maps port 8081 and sets upstreams):
+
+```bash
+docker run --name dora-proxy -d --restart=unless-stopped -p 8081:8081 \
+  -e PROXY_UPSTREAM_BASE_URL=https://light-beacon.fusionist.io \
+  -e PROXY_CONSENSUS_API_URL=http://your-beacon-node:5052 \
+  dora-proxy:latest
+```
+
+Notes:
+- `PROXY_LISTEN_ADDR` defaults to `:8081` in the container; override with `-e PROXY_LISTEN_ADDR=...` if needed.

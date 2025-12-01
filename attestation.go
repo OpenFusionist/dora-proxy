@@ -65,7 +65,7 @@ func NewAttestationTracker(client *http.Client, consensusAPI string, cache *Last
 // on a fixed schedule. It is best-effort and silent on errors.
 func (t *AttestationTracker) Start() {
 	go func() {
-		// 每个slot扫描一次
+		// Scan once per slot
 		ticker := time.NewTicker(time.Duration(secondsPerSlot) * time.Second)
 		defer ticker.Stop()
 		t.log.Info("attestation slot scanner started")

@@ -9,7 +9,7 @@ Beacon Explorer is costly to operate (depends on Bigtable and other heavy compon
 
 ### Endpoints
 
-- POST `/api/v1/validator` → 上游 `/api/v1/validator`
+- POST `/api/v1/validator` → upstream `/api/v1/validator`
   - What it does：
     - `status` mapping: `active_ongoing → active_online`; `status:withdrawal_done+is_slashed=true → slashed`; `status:withdrawal_done+is_slashed=false → exited`.
     - add `lastattestationslot` (from consensus API).
